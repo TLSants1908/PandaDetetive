@@ -1,6 +1,4 @@
-import { REQUIRED_CLUES, CULPRIT, clueTexts, neutralTexts, pandaDialogues, childDialogues, dogDialogues } from './data.js';
-import { gameState } from './state.js';
-import { showPopup, closePopup, showMessage, createButton } from './ui.js';
+let cachedObjects = [];
 
 function shuffle(array) {
     const result = [...array];
@@ -11,131 +9,141 @@ function shuffle(array) {
     return result;
 }
 
-export function prepareCase(searchableObjects) {
-    gameState.clueMap.clear();
-    gameState.foundClues.clear();
-    gameState.gameFinished = false;
+window.prepareCase = function(searchableObjects) {
+    if (typeof randomizeCulprit === "function") {
+        randomizeCulprit();
+    }
+    console.log("Culpado desta partida (debug):", CULPRIT);
+
+    window.gameState.clueMap.clear();
+    window.gameState.foundClues.clear();
+    window.gameState.gameFinished = false;
 
     const randomizedObjects = shuffle(searchableObjects);
     const selectedObjects = randomizedObjects.slice(0, REQUIRED_CLUES);
     const randomizedClues = shuffle(clueTexts);
 
     selectedObjects.forEach((object, index) => {
-        gameState.clueMap.set(object, randomizedClues[index]);
+        window.gameState.clueMap.set(object, randomizedClues[index]);
     });
-    
-    closePopup();
-}
 
-export function investigateObject(object) {
-    if (gameState.gameFinished) return;
+    window.closePopup();
+};
 
-    const clueText = gameState.clueMap.get(object);
+window.investigateObject = function(object) {
+    if (window.gameState.gameFinished) return;
+
+    const clueText = window.gameState.clueMap.get(object);
 
     if (!clueText) {
         const neutralText = neutralTexts[object.dataset.name] || "Você investigou este objeto, mas não encontrou nenhuma pista.";
-        showMessage(object.dataset.name, neutralText);
+        window.showMessage(object.dataset.name, neutralText);
         return;
     }
 
-    if (gameState.foundClues.has(object)) {
-        showMessage("PISTA JÁ ENCONTRADA", clueText);
+    if (window.gameState.foundClues.has(object)) {
+        window.showMessage("PISTA JÁ ENCONTRADA", clueText);
         return;
     }
 
-    gameState.foundClues.add(object);
+    window.gameState.foundClues.add(object);
 
-    if (gameState.foundClues.size === REQUIRED_CLUES) {
-        showPopup({
+    if (window.gameState.foundClues.size === REQUIRED_CLUES) {
+        window.showPopup({
             title: "ÚLTIMA PISTA ENCONTRADA",
-            text: `${clueText} Você encontrou todas as seis pistas. Deseja indicar o culpado agora?`,
+            text: `${clueText} Você encontrou todas as pistas. Deseja indicar o culpado agora?`,
             buttons: [
-                createButton("SIM, INDICAR", showAccusation, "success-button"),
-                createButton("AINDA NÃO", closePopup)
+                window.createButton("SIM, INDICAR", window.showAccusation, "success-button"),
+                window.createButton("AINDA NÃO", window.closePopup)
             ]
         });
         return;
     }
 
-    showMessage("PISTA ENCONTRADA", `${clueText} Converse novamente com os personagens para obter novas dicas.`);
-}
+    window.showMessage("PISTA ENCONTRADA", `${clueText} Converse novamente com os personagens para obter novas dicas.`);
+};
 
-export function getCharacterDialogue(characterName) {
-    const progress = Math.min(gameState.foundClues.size, REQUIRED_CLUES);
-    
+window.getCharacterDialogue = function(characterName) {
+    const progress = Math.min(window.gameState.foundClues.size, REQUIRED_CLUES);
+
     if (characterName === "PANDA DETETIVE") return pandaDialogues[progress];
     if (characterName === "CRIANÇA") return childDialogues[progress];
     if (characterName === "CACHORRO") return dogDialogues[progress];
-    
-    return "Este personagem não tem nada a dizer agora.";
-}
+    if (characterName === "GATA") return catDialogues[progress];
 
-export function showJudgmentOffer() {
-    if (gameState.foundClues.size < REQUIRED_CLUES) {
-        showMessage("INVESTIGAÇÃO INCOMPLETA", "Ainda existem pistas escondidas. Continue investigando os objetos do quarto.");
+    return "Este personagem não tem nada a dizer agora.";
+};
+
+window.showJudgmentOffer = function() {
+    if (window.gameState.foundClues.size < REQUIRED_CLUES) {
+        window.showMessage("INVESTIGAÇÃO INCOMPLETA", "Ainda existem pistas escondidas. Continue investigando os objetos do quarto.");
         return;
     }
 
-    showPopup({
+    window.showPopup({
         title: "INVESTIGAÇÃO CONCLUÍDA",
         text: "Todas as pistas foram encontradas. Deseja indicar o culpado?",
         buttons: [
-            createButton("SIM", showAccusation, "success-button"),
-            createButton("NÃO", closePopup)
+            window.createButton("SIM", window.showAccusation, "success-button"),
+            window.createButton("NÃO", window.closePopup)
         ]
     });
-}
+};
 
-function showAccusation() {
-    showPopup({
+window.showAccusation = function() {
+    window.showPopup({
         title: "QUEM ROUBOU OS DOCES?",
         text: "Analise as pistas e escolha quem deve ser acusado.",
         buttons: [
-            createButton("CACHORRO", () => judgeAccusation("CACHORRO")),
-            createButton("CRIANÇA", () => judgeAccusation("CRIANÇA"))
+            window.createButton("CACHORRO", () => window.judgeAccusation("CACHORRO")),
+            window.createButton("CRIANÇA", () => window.judgeAccusation("CRIANÇA")),
+            window.createButton("GATA", () => window.judgeAccusation("GATA"))
         ]
     });
-}
+};
 
-function judgeAccusation(accused) {
-    gameState.gameFinished = true;
-    
+window.judgeAccusation = function(accused) {
+    window.gameState.gameFinished = true;
+
     if (accused === CULPRIT) {
-        showEndScreen(true, "PARABÉNS!", "Você encontrou o ladrão dos doces e recuperou o saco de doces!");
+        window.showEndScreen(true, "PARABÉNS!", `Você encontrou o verdadeiro culpado (${culpritNameFormated(CULPRIT)}) e recuperou o saco de doces!`);
         return;
     }
-    showEndScreen(false, "GAME OVER", "Você acusou um inocente. O verdadeiro ladrão escapou com os doces.");
+    window.showEndScreen(false, "GAME OVER", `Você acusou um inocente. O verdadeiro culpado era o(a) ${culpritNameFormated(CULPRIT)} e escapou com os doces.`);
+};
+
+function culpritNameFormated(name) {
+    if (name === "CACHORRO") return "o Cachorro";
+    if (name === "CRIANÇA") return "a Criança";
+    return "a Gata";
 }
 
-function showEndScreen(victory, title, text) {
-    showPopup({
+window.showEndScreen = function(victory, title, text) {
+    window.showPopup({
         title: title,
         text: `${text} Deseja jogar novamente?`,
         image: victory,
         buttons: [
-            createButton("SIM", restartGame, "success-button"),
-            createButton("NÃO", closeGame, "danger-button")
+            window.createButton("SIM", window.restartGame, "success-button"),
+            window.createButton("NÃO", window.closeGame, "danger-button")
         ]
     });
-}
+};
 
-// Dependência injetada via escopo do módulo para reiniciar com os mesmos objetos
-let cachedObjects = [];
-
-export function setCachedObjects(objects) {
+window.setCachedObjects = function(objects) {
     cachedObjects = objects;
-}
+};
 
-function restartGame() {
-    prepareCase(cachedObjects);
-    showPopup({
+window.restartGame = function() {
+    window.prepareCase(cachedObjects);
+    window.showPopup({
         title: "NOVO CASO",
-        text: "As seis pistas foram escondidas em novos objetos. Comece uma nova investigação!",
-        buttons: [createButton("COMEÇAR", closePopup, "success-button")]
+        text: "As pistas foram escondidas em novos objetos e um novo culpado foi sorteado. Comece uma nova investigação!",
+        buttons: [window.createButton("COMEÇAR", window.closePopup, "success-button")]
     });
-}
+};
 
-function closeGame() {
+window.closeGame = function() {
     window.close();
     setTimeout(() => {
         document.body.innerHTML = `
@@ -145,4 +153,4 @@ function closeGame() {
             </main>
         `;
     }, 150);
-}
+};

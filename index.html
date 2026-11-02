@@ -16,7 +16,7 @@
 
 <body>
 
-    <main id="game">
+    <main id="game" class="hidden">
 
         <section id="scene">
 
@@ -841,6 +841,13 @@
             >
 
                 <button
+                class="character character-cat"
+                type="button"
+                data-name="GATA"
+                aria-label="Conversar com a gata"
+                ></button>
+
+                <button
                     class="character character-kid"
                     type="button"
                     data-name="CRIANÇA"
@@ -910,10 +917,50 @@
             </div>
 
         </div>
-
     </main>
 
-    <script type="module" src="src/main.js"></script>
+    <!-- MENU INICIAL -->
+    <div id="start-menu" role="dialog" aria-modal="true" aria-labelledby="start-title">
+        <div class="menu-box">
+            <h1 id="start-title">PANDA DETETIVE</h1>
+            <p class="menu-subtitle">O Mistério da Festa do Pijama</p>
+            <div class="menu-separator"></div>
+
+            <div class="volume-control">
+                <label for="start-volume-slider">Volume: <span id="start-volume-value">50%</span></label>
+                <input type="range" id="start-volume-slider" min="0" max="100" value="50">
+            </div>
+
+            <div class="menu-actions">
+                <button id="btn-start-game" type="button" class="success-button">INICIAR JOGO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU DE PAUSA (ESC) -->
+    <div id="pause-menu" class="hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <div class="menu-box">
+            <h2 id="pause-title">JOGO PAUSADO</h2>
+            <div class="menu-separator"></div>
+
+            <div class="volume-control">
+                <label for="pause-volume-slider">Volume: <span id="pause-volume-value">50%</span></label>
+                <input type="range" id="pause-volume-slider" min="0" max="100" value="50">
+            </div>
+
+            <div class="menu-actions">
+                <button id="btn-resume-game" type="button" class="success-button">VOLTAR AO JOGO</button>
+                <button id="btn-restart-game" type="button">REINICIAR PARTIDA</button>
+                <button id="btn-back-to-title" type="button" class="danger-button">MENU INICIAL</button>
+            </div>
+        </div>
+    </div>
+
+    <script defer src="src/data.js"></script>
+    <script defer src="src/state.js"></script>
+    <script defer src="src/ui.js"></script>
+    <script defer src="src/game.js"></script>
+    <script defer src="src/main.js"></script>
 
 </body>
 

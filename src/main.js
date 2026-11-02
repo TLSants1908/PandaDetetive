@@ -1,64 +1,110 @@
-import { REQUIRED_CLUES } from './data.js';
-import { gameState } from './state.js';
-import { showPopup, closePopup, showMessage, createButton } from './ui.js';
-import { prepareCase, investigateObject, showJudgmentOffer, getCharacterDialogue, setCachedObjects } from './game.js';
+document.addEventListener("DOMContentLoaded", () => {
+    const hotspots = Array.from(document.querySelectorAll(".hotspot"));
+    const airplaneHitbox = document.getElementById("airplane-hitbox");
+    const airplaneOutline = document.getElementById("airplane-outline");
+    const characters = document.querySelectorAll(".character");
 
-// Query Selectors
-const hotspots = Array.from(document.querySelectorAll(".hotspot"));
-const airplaneHitbox = document.getElementById("airplane-hitbox");
-const airplaneOutline = document.getElementById("airplane-outline");
-const characters = document.querySelectorAll(".character");
-const popup = document.getElementById("popup");
+    const btnStartGame = document.getElementById("btn-start-game");
+    const btnResumeGame = document.getElementById("btn-resume-game");
+    const btnRestartGame = document.getElementById("btn-restart-game");
+    const btnBackToTitle = document.getElementById("btn-back-to-title");
+    const startVolumeSlider = document.getElementById("start-volume-slider");
+    const pauseVolumeSlider = document.getElementById("pause-volume-slider");
 
-const searchableObjects = [
-    ...hotspots.filter((hotspot) => hotspot.id !== "airplane-outline"),
-    airplaneHitbox
-].filter(Boolean);
+    const searchableObjects = [
+        ...hotspots.filter((hotspot) => hotspot.id !== "airplane-outline"),
+        airplaneHitbox
+    ].filter(Boolean);
 
-setCachedObjects(searchableObjects);
+    window.setCachedObjects(searchableObjects);
 
-// Eventos de Investigação (Objetos)
-searchableObjects.forEach((object) => {
-    object.addEventListener("click", (event) => {
-        event.stopPropagation();
-        investigateObject(object);
+    // Exibe apenas o menu inicial ao carregar a página
+    window.showStartMenu();
+
+    // Eventos de Investigação (Objetos)
+    searchableObjects.forEach((object) => {
+        object.addEventListener("click", (event) => {
+            event.stopPropagation();
+            if (window.gameState.isPaused || !window.gameState.gameStarted) return;
+            window.investigateObject(object);
+        });
     });
-});
 
-// Eventos Visuais (Avião)
-if (airplaneHitbox && airplaneOutline) {
-    airplaneHitbox.addEventListener("mouseenter", () => airplaneOutline.classList.add("airplane-active"));
-    airplaneHitbox.addEventListener("mouseleave", () => airplaneOutline.classList.remove("airplane-active"));
-}
+    // Eventos Visuais (Avião)
+    if (airplaneHitbox && airplaneOutline) {
+        airplaneHitbox.addEventListener("mouseenter", () => airplaneOutline.classList.add("airplane-active"));
+        airplaneHitbox.addEventListener("mouseleave", () => airplaneOutline.classList.remove("airplane-active"));
+    }
 
-// Eventos de Personagens (Diálogos e Acusação)
-characters.forEach((character) => {
-    character.addEventListener("click", (event) => {
-        event.stopPropagation();
-        
-        if (character.dataset.name === "PANDA DETETIVE" && gameState.foundClues.size === REQUIRED_CLUES) {
-            showJudgmentOffer();
-            return;
+    // Eventos de Personagens (Diálogos e Acusação)
+    characters.forEach((character) => {
+        character.addEventListener("click", (event) => {
+            event.stopPropagation();
+            if (window.gameState.isPaused || !window.gameState.gameStarted) return;
+
+            if (character.dataset.name === "PANDA DETETIVE" && window.gameState.foundClues.size === REQUIRED_CLUES) {
+                window.showJudgmentOffer();
+                return;
+            }
+
+            window.showMessage(character.dataset.name, window.getCharacterDialogue(character.dataset.name));
+        });
+    });
+
+    // Fechar Popup clicando fora
+    const popupElement = document.getElementById("popup");
+    if (popupElement) {
+        popupElement.addEventListener("click", (event) => {
+            if (event.target === popupElement && !window.gameState.gameFinished) window.closePopup();
+        });
+    }
+
+    // Tecla ESC abre/fecha o Menu de Pausa
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && window.gameState.gameStarted && !window.gameState.gameFinished) {
+            window.togglePauseMenu();
         }
-        
-        showMessage(character.dataset.name, getCharacterDialogue(character.dataset.name));
     });
-});
 
-// Eventos do Popup (Fechar)
-popup.addEventListener("click", (event) => {
-    if (event.target === popup && !gameState.gameFinished) closePopup();
-});
+    // Controles dos Botões do Menu e Pausa
+    if (btnStartGame) {
+        btnStartGame.addEventListener("click", () => {
+            window.hideStartMenu();
+            window.gameState.gameStarted = true;
+            window.prepareCase(searchableObjects);
 
-document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !gameState.gameFinished) closePopup();
-});
+            window.showPopup({
+                title: "CASO: O ROUBO DOS DOCES",
+                text: "Investigue os objetos do quarto e encontre as pistas necessárias. Os personagens não escondem pistas, mas os diálogos mudam conforme novas evidências são descobertas.",
+                buttons: [window.createButton("COMEÇAR", window.closePopup, "success-button")]
+            });
+        });
+    }
 
-// Inicialização da Partida
-prepareCase(searchableObjects);
+    if (btnResumeGame) {
+        btnResumeGame.addEventListener("click", window.closePauseMenu);
+    }
 
-showPopup({
-    title: "CASO: O ROUBO DOS DOCES",
-    text: "Investigue os objetos do quarto e encontre seis pistas. Os personagens não escondem pistas, mas os diálogos mudam conforme novas evidências são descobertas.",
-    buttons: [createButton("COMEÇAR", closePopup, "success-button")]
+    if (btnRestartGame) {
+        btnRestartGame.addEventListener("click", () => {
+            window.closePauseMenu();
+            window.restartGame();
+        });
+    }
+
+    if (btnBackToTitle) {
+        btnBackToTitle.addEventListener("click", () => {
+            window.closePauseMenu();
+            window.closePopup();
+            window.gameState.gameStarted = false;
+            window.showStartMenu();
+        });
+    }
+
+    if (startVolumeSlider) {
+        startVolumeSlider.addEventListener("input", (event) => window.updateVolumeUI(event.target.value));
+    }
+    if (pauseVolumeSlider) {
+        pauseVolumeSlider.addEventListener("input", (event) => window.updateVolumeUI(event.target.value));
+    }
 });
