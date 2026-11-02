@@ -1,0 +1,430 @@
+/* =========================================================
+   CONFIGURAÇÕES GERAIS
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   JOGO E CENÁRIO
+========================================================= */
+
+#game {
+    width: 100%;
+    max-width: 1440px;
+    position: relative;
+}
+
+#scene {
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    position: relative;
+    overflow: hidden;
+}
+
+#room {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   HOTSPOTS
+========================================================= */
+
+#hotspots {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+}
+
+.hotspot {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    cursor: pointer;
+    pointer-events: all;
+
+    transition:
+        fill 0.12s ease,
+        stroke 0.12s ease,
+        stroke-width 0.12s ease,
+        filter 0.12s ease;
+}
+
+.hotspot:hover {
+    fill: rgba(255, 215, 0, 0.22);
+    stroke: rgba(255, 215, 0, 1);
+    stroke-width: 3.5;
+
+    filter:
+        drop-shadow(
+            0 0 5px
+            rgba(255, 215, 0, 0.9)
+        );
+}
+
+
+/* =========================================================
+   AVIÃO
+========================================================= */
+
+.airplane-outline {
+    pointer-events: none;
+}
+
+.airplane-hitbox {
+    fill: transparent;
+    stroke: transparent;
+    pointer-events: all;
+    cursor: pointer;
+}
+
+.airplane-outline.airplane-active {
+    fill: rgba(255, 215, 0, 0.28);
+    stroke: rgba(255, 215, 0, 1);
+    stroke-width: 4;
+
+    filter:
+        drop-shadow(
+            0 0 6px
+            rgba(255, 215, 0, 1)
+        );
+}
+
+
+/* =========================================================
+   PERSONAGENS
+========================================================= */
+
+#characters {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.character {
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: contain;
+
+    cursor: pointer;
+    pointer-events: auto;
+
+    transition:
+        transform 0.16s ease,
+        filter 0.16s ease;
+}
+
+.character:hover,
+.character:focus-visible {
+    transform: scale(1.04);
+
+    filter:
+        drop-shadow(2px 0 0 #ffd700)
+        drop-shadow(-2px 0 0 #ffd700)
+        drop-shadow(0 2px 0 #ffd700)
+        drop-shadow(0 -2px 0 #ffd700)
+        drop-shadow(0 0 7px rgba(255, 215, 0, 0.95));
+}
+
+.character:active {
+    transform: scale(1.01);
+}
+
+.character-kid {
+    width: 10%;
+    height: 52%;
+    left: 20%;
+    bottom: 10.5%;
+    background-image: url("Img/Kid.png");
+}
+
+.character-panda {
+    width: 13.5%;
+    height: 52%;
+    left: 50%;
+    bottom: 23%;
+    background-image: url("Img/Panda.png");
+}
+
+.character-dog {
+    width: 11.5%;
+    height: 42%;
+    right: 28.5%;
+    bottom: 4.5%;
+    background-image: url("Img/Dog.png");
+}
+
+
+/* =========================================================
+   POPUP
+========================================================= */
+
+#popup {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.72);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 100;
+}
+
+#popup-box {
+    width: min(90%, 560px);
+    min-height: 220px;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    padding: 32px;
+
+    background: #f5f1e6;
+    color: #222;
+
+    border: 3px solid #2b2040;
+    border-radius: 16px;
+
+    text-align: center;
+
+    box-shadow:
+        0 12px 45px
+        rgba(0, 0, 0, 0.65);
+
+    animation:
+        popupAppear 0.18s ease-out;
+}
+
+@keyframes popupAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+#popup-title {
+    font-size: 25px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+#popup-separator {
+    width: 70px;
+    height: 3px;
+
+    margin:
+        0 auto 20px auto;
+
+    background: #2b2040;
+    border-radius: 5px;
+}
+
+#popup-text {
+    font-size: 19px;
+    line-height: 1.6;
+
+    min-height: 30px;
+    margin-bottom: 22px;
+}
+
+
+/* =========================================================
+   IMAGEM DA VITÓRIA
+========================================================= */
+
+#popup-image {
+    display: block;
+
+    width: min(190px, 55%);
+    aspect-ratio: 1 / 1;
+
+    margin:
+        0 auto 22px auto;
+
+    background-image:
+        url("Img/SacoDC.png");
+
+    background-repeat:
+        no-repeat;
+
+    background-position:
+        center;
+
+    background-size:
+        contain;
+}
+
+
+/* =========================================================
+   BOTÕES DO POPUP
+========================================================= */
+
+#popup-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+#popup-actions button {
+    padding: 12px 24px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #252525;
+    color: white;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+#popup-actions button:hover,
+#popup-actions button:focus-visible {
+    background: #4c376e;
+    transform: scale(1.04);
+
+    outline: 3px solid #ffd700;
+    outline-offset: 2px;
+}
+
+#popup-actions button:active {
+    transform: scale(0.98);
+}
+
+#popup-actions .success-button {
+    background: #276334;
+}
+
+#popup-actions .success-button:hover,
+#popup-actions .success-button:focus-visible {
+    background: #358046;
+}
+
+#popup-actions .danger-button {
+    background: #8c2525;
+}
+
+#popup-actions .danger-button:hover,
+#popup-actions .danger-button:focus-visible {
+    background: #b13030;
+}
+
+
+/* =========================================================
+   TELA DE JOGO ENCERRADO
+========================================================= */
+
+.closed-game-message {
+    width: min(90%, 600px);
+
+    padding: 45px;
+
+    color: #fff;
+    background: #2b2040;
+
+    border: 3px solid #ffd700;
+    border-radius: 16px;
+
+    text-align: center;
+
+    box-shadow:
+        0 12px 45px
+        rgba(0, 0, 0, 0.65);
+}
+
+.closed-game-message h1 {
+    margin-bottom: 20px;
+    color: #ffd700;
+}
+
+.closed-game-message p {
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   ELEMENTOS OCULTOS
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    #popup-box {
+        padding: 22px 18px;
+    }
+
+    #popup-title {
+        font-size: 21px;
+    }
+
+    #popup-text {
+        font-size: 16px;
+    }
+
+    #popup-actions button {
+        width: 100%;
+    }
+}
