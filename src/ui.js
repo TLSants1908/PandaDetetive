@@ -92,4 +92,8 @@ window.updateVolumeUI = function(value) {
     if (pauseVolSlider) pauseVolSlider.value = numericValue;
     if (startVolVal) startVolVal.textContent = `${numericValue}%`;
     if (pauseVolVal) pauseVolVal.textContent = `${numericValue}%`;
+
+    if (window.atualizarVolumeAudio) {
+        window.atualizarVolumeAudio(window.gameState.volume);
+    }
 };

@@ -175,6 +175,22 @@ body {
     background-image: url("img/cat.png");
 }
 
+.character-chicken {
+    width: 10%;
+    height: 35%;
+    left: 36%;
+    bottom: 8%;
+    background-image: url("img/chicken.jpeg");
+}
+
+.character-turtle {
+    width: 14%;
+    height: 25%;
+    right: 42%; 
+    bottom: 4%;
+    background-image: url("img/turtle.jpeg");
+}
+
 
 /* =========================================================
    POPUP

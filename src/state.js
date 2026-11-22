@@ -4,5 +4,5 @@ window.gameState = {
     gameFinished: false,
     gameStarted: false,
     isPaused: false,
-    volume: 0.5
+    volume: 0.3
 };

@@ -1,27 +1,44 @@
 const REQUIRED_CLUES = 9;
-const SUSPECTS = ["CACHORRO", "CRIANÇA", "GATA"];
+const SUSPECTS = ["CACHORRO", "CRIANÇA", "GATA", "GALINHA", "TARTARUGA", "PANDA"];
 let CULPRIT = SUSPECTS[Math.floor(Math.random() * SUSPECTS.length)];
 
 function randomizeCulprit() {
     CULPRIT = SUSPECTS[Math.floor(Math.random() * SUSPECTS.length)];
 }
 
-const clueTexts = [
-    // Pistas do Cachorro
-    "Você encontrou pegadas que combinam com as patas do cachorro.",
-    "Você encontrou pelos do cachorro perto do local onde os doces estavam.",
-    "Você encontrou migalhas de doce no caminho percorrido pelo cachorro.",
-    
-    // Pistas da Criança
-    "Você encontrou uma embalagem de doce amassada e escondida.",
-    "Você encontrou uma marca de mordida compatível com os dentes da criança.",
-    "Você encontrou um pedaço da fita do saco de doces preso em pelos da criança.",
-
-    // Pistas da Gata
-    "Você encontrou arranhões suspeitos na caixa onde os doces estavam guardados.",
-    "Você encontrou tufos de pelos de gato grudados no embrulho rasgado.",
-    "You encontrou pegadas sutis de patinhas felinas em cima da escrivaninha."
-];
+// NOVA LÓGICA: Pistas agora estão agrupadas por suspeito para facilitar o sorteio lógico
+const cluesBySuspect = {
+    "CACHORRO": [
+        "Você encontrou pegadas que combinam com as patas do cachorro.",
+        "Você encontrou pelos do cachorro perto do local onde os doces estavam.",
+        "Você encontrou migalhas de doce no caminho percorrido pelo cachorro."
+    ],
+    "CRIANÇA": [
+        "Você encontrou uma embalagem de doce amassada e escondida.",
+        "Você encontrou uma marca de mordida compatível com os dentes da criança.",
+        "Você encontrou um pedaço da fita do saco de doces preso em pelos da criança."
+    ],
+    "GATA": [
+        "Você encontrou arranhões suspeitos na caixa onde os doces estavam guardados.",
+        "Você encontrou tufos de pelos de gato grudados no embrulho rasgado.",
+        "Você encontrou pegadas sutis de patinhas felinas em cima da escrivaninha."
+    ],
+    "GALINHA": [
+        "Você encontrou penas brancas espalhadas perto do armário.",
+        "Você notou marcas de bico no plástico que envolvia os doces.",
+        "Você achou pequenas pegadas de três dedos com formato de garra."
+    ],
+    "TARTARUGA": [
+        "Você encontrou um rastro de umidade de alguém que rastejou pelo chão.",
+        "Você notou um pedaço de alface caído próximo ao local do sumiço.",
+        "Você achou marcas de garras lentas, pesadas e arredondadas no tapete."
+    ],
+    "PANDA": [
+        "Você encontrou tufos de pelos pretos e brancos caídos no chão.",
+        "Você notou pedaços de bambu mascado perto de onde os doces estavam.",
+        "Você achou uma pegada grande e pesada que se parece com a de um urso."
+    ]
+};
 
 const neutralTexts = {
     "ARMÁRIO": "Você examinou o armário, mas não encontrou nenhuma pista.",
@@ -33,7 +50,7 @@ const neutralTexts = {
     "TAPETE": "Você observou o tapete com cuidado. Nenhuma pista foi encontrada aqui.",
     "ESCRIVANINHA": "A escrivaninha não contém nenhuma pista nesta partida.",
     "MALA": "Você examinou a mala, mas não encontrou evidências.",
-    "PUFF": "You verificou o puff. Nada suspeito foi encontrado.",
+    "PUFF": "Você verificou o puff. Nada suspeito foi encontrado.",
     "LUMINÁRIA": "A luminária não tem relação com o desaparecimento dos doces.",
     "ABAJUR DE CHÃO": "O abajur não apresenta nenhuma pista.",
     "PRATELEIRA 1": "Você verificou a primeira prateleira. Nada foi encontrado.",
@@ -41,15 +58,15 @@ const neutralTexts = {
 };
 
 const pandaDialogues = [
-    "Precisamos investigar o quarto. Examine os objetos e procure evidências.",
-    "Boa descoberta. Ainda precisamos encontrar outras pistas antes de acusar alguém.",
-    "As evidências estão formando um caminho. Continue observando os objetos do quarto.",
-    "Algumas pistas parecem estar relacionadas a diferentes suspeitos que circularam por aqui.",
-    "Pelos, arranhões ou pegadas miúdas podem revelar quem passou perto dos doces.",
-    "Estamos perto da verdade. Compare as pistas encontradas com os personagens.",
-    "Continue investigando até juntar todas as evidências necessárias.",
-    "Quase tudo revelado. Analise bem os rastros deixados no quarto.",
-    "Todas as pistas foram encontradas. Agora podemos indicar o culpado."
+    "Precisamos investigar o quarto. E não me olhe com essa cara, sou o detetive, não um suspeito!",
+    "Boa descoberta. Pelos pretos e brancos podem ser de qualquer um... quer dizer, continue procurando.",
+    "As evidências estão formando um caminho. Observe todos os objetos do quarto.",
+    "Algumas pistas parecem apontar para mim, mas eu garanto que estava comendo apenas bambu!",
+    "Pelos, arranhões ou pegadas podem revelar quem passou perto dos doces.",
+    "Estamos perto da verdade. O culpado será aquele com o maior número de pistas deixadas.",
+    "Continue investigando. Como detetive, exijo que todas as provas sejam achadas.",
+    "Quase tudo revelado. Analise bem os rastros, por favor, seja justo na sua avaliação!",
+    "Todas as pistas foram encontradas. Faça sua acusação (e espero de verdade que não seja eu)."
 ];
 
 const childDialogues = [
@@ -86,4 +103,28 @@ const catDialogues = [
     "Certamente o culpado é quem tem hábitos menos elegantes que os meus.",
     "Você está quase juntando todas as evidências...",
     "Termine de investigar o quarto antes de apontar o dedo para mim."
+];
+
+const chickenDialogues = [
+    "Có có! Eu estava ciscando lá fora, juro que não vi doces.",
+    "Penas? Muitas aves perdem penas por aí, isso é natural! Có có.",
+    "Alguém bicou o embrulho? Talvez um pássaro que voou pela janela.",
+    "Eu durmo cedo, não estava acordada quando os doces sumiram.",
+    "Não tente colocar a culpa em mim só porque sou uma ave curiosa.",
+    "Có có! Se eu fosse roubar algo, seria milho, não doces.",
+    "Acho que a tartaruga estava rondando por aqui também...",
+    "Quase todas as pistas foram achadas. Estou nervosa! Có có.",
+    "Termine logo isso! Quero voltar pro meu ninho em paz."
+];
+
+const turtleDialogues = [
+    "Eu... ando... muito... devagar... Não conseguiria fugir com os doces.",
+    "Rastro... de... umidade? Deve ser só água do vaso de plantas.",
+    "Alface? Alguém deve ter deixado cair do sanduíche.",
+    "Estou aqui na mesma posição desde que a festa começou...",
+    "Não me olhe assim. Sou pacífica e vegetariana.",
+    "As garras que vocês acharam devem ser de outra pessoa.",
+    "O... Panda... também... gosta de comer bastante, não acha?",
+    "Muitas... pistas... A verdade... vai... aparecer.",
+    "Estou... pronta... para ouvir a sua acusação."
 ];

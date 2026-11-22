@@ -21,10 +21,30 @@ window.prepareCase = function(searchableObjects) {
 
     const randomizedObjects = shuffle(searchableObjects);
     const selectedObjects = randomizedObjects.slice(0, REQUIRED_CLUES);
-    const randomizedClues = shuffle(clueTexts);
+    
+    // 1. Pegamos as 3 pistas exclusivas do culpado
+    const culpritClues = [...cluesBySuspect[CULPRIT]];
+    
+    // 2. Sorteamos 1 pista para cada um dos 5 inocentes (totalizando 5 pistas)
+    let innocentClues = [];
+    let remainingInnocentClues = [];
+    
+    SUSPECTS.forEach(suspect => {
+        if (suspect !== CULPRIT) {
+            const shuffled = shuffle(cluesBySuspect[suspect]);
+            innocentClues.push(shuffled[0]); // Primeira pista embaralhada do inocente
+            remainingInnocentClues.push(shuffled[1], shuffled[2]); // Guarda o resto para a confusão
+        }
+    });
+    
+    // 3. Pegamos 1 pista extra aleatória de um inocente qualquer para dar dúvida
+    const extraClue = shuffle(remainingInnocentClues)[0];
+    
+    // Junta as 3 pistas do culpado + as 6 pistas inocentes, e embaralha a ordem delas no quarto
+    const finalClues = shuffle([...culpritClues, ...innocentClues, extraClue]);
 
     selectedObjects.forEach((object, index) => {
-        window.gameState.clueMap.set(object, randomizedClues[index]);
+        window.gameState.clueMap.set(object, finalClues[index]);
     });
 
     window.closePopup();
@@ -70,6 +90,8 @@ window.getCharacterDialogue = function(characterName) {
     if (characterName === "CRIANÇA") return childDialogues[progress];
     if (characterName === "CACHORRO") return dogDialogues[progress];
     if (characterName === "GATA") return catDialogues[progress];
+    if (characterName === "GALINHA") return chickenDialogues[progress];
+    if (characterName === "TARTARUGA") return turtleDialogues[progress];
 
     return "Este personagem não tem nada a dizer agora.";
 };
@@ -97,25 +119,37 @@ window.showAccusation = function() {
         buttons: [
             window.createButton("CACHORRO", () => window.judgeAccusation("CACHORRO")),
             window.createButton("CRIANÇA", () => window.judgeAccusation("CRIANÇA")),
-            window.createButton("GATA", () => window.judgeAccusation("GATA"))
+            window.createButton("GATA", () => window.judgeAccusation("GATA")),
+            window.createButton("GALINHA", () => window.judgeAccusation("GALINHA")),
+            window.createButton("TARTARUGA", () => window.judgeAccusation("TARTARUGA")),
+            window.createButton("PANDA", () => window.judgeAccusation("PANDA"))
         ]
     });
 };
 
 window.judgeAccusation = function(accused) {
     window.gameState.gameFinished = true;
+    
+    if (window.pararMusicaJogo) window.pararMusicaJogo();
 
     if (accused === CULPRIT) {
+        if (window.tocarSomVitoria) window.tocarSomVitoria();
         window.showEndScreen(true, "PARABÉNS!", `Você encontrou o verdadeiro culpado (${culpritNameFormated(CULPRIT)}) e recuperou o saco de doces!`);
         return;
     }
-    window.showEndScreen(false, "GAME OVER", `Você acusou um inocente. O verdadeiro culpado era o(a) ${culpritNameFormated(CULPRIT)} e escapou com os doces.`);
+    
+    if (window.tocarSomDerrota) window.tocarSomDerrota();
+    window.showEndScreen(false, "GAME OVER", `Você acusou um inocente. O verdadeiro culpado era ${culpritNameFormated(CULPRIT)} e escapou com os doces.`);
 };
 
 function culpritNameFormated(name) {
     if (name === "CACHORRO") return "o Cachorro";
     if (name === "CRIANÇA") return "a Criança";
-    return "a Gata";
+    if (name === "GATA") return "a Gata";
+    if (name === "GALINHA") return "a Galinha";
+    if (name === "TARTARUGA") return "a Tartaruga";
+    if (name === "PANDA") return "o Panda Detetive";
+    return "o Culpado";
 }
 
 window.showEndScreen = function(victory, title, text) {
@@ -139,7 +173,11 @@ window.restartGame = function() {
     window.showPopup({
         title: "NOVO CASO",
         text: "As pistas foram escondidas em novos objetos e um novo culpado foi sorteado. Comece uma nova investigação!",
-        buttons: [window.createButton("COMEÇAR", window.closePopup, "success-button")]
+        buttons: [window.createButton("COMEÇAR", () => {
+            window.closePopup();
+            if (window.pararSonsFinais) window.pararSonsFinais();
+            if (window.iniciarMusicaJogo) window.iniciarMusicaJogo();
+        }, "success-button")]
     });
 };
 
