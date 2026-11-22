@@ -23,6 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Eventos de Investigação (Objetos)
     searchableObjects.forEach((object) => {
+        
+        // NOVO EVENTO: Passar o mouse toca o som específico do objeto
+        object.addEventListener("mouseenter", () => {
+            if (window.gameState.isPaused || !window.gameState.gameStarted) return;
+            if (window.tocarSomObjeto) window.tocarSomObjeto(object.dataset.name);
+        });
+
         object.addEventListener("click", (event) => {
             event.stopPropagation();
             if (window.gameState.isPaused || !window.gameState.gameStarted) return;
@@ -73,6 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
             window.gameState.gameStarted = true;
             window.prepareCase(searchableObjects);
 
+            if (window.pararMusicaMenu) window.pararMusicaMenu();
+            if (window.iniciarMusicaJogo) window.iniciarMusicaJogo();
+
             window.showPopup({
                 title: "CASO: O ROUBO DOS DOCES",
                 text: "Investigue os objetos do quarto e encontre as pistas necessárias. Os personagens não escondem pistas, mas os diálogos mudam conforme novas evidências são descobertas.",
@@ -98,6 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
             window.closePopup();
             window.gameState.gameStarted = false;
             window.showStartMenu();
+
+            if (window.pararMusicaJogo) window.pararMusicaJogo();
+            if (window.iniciarMusicaMenu) window.iniciarMusicaMenu();
         });
     }
 
